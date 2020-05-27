@@ -1,4 +1,4 @@
-<form [formGroup]='service.form' class='normal-class' (onsubmit)="onSubmit()">
+<form [formGroup]='service.form' class='normal-class' (submit)="onSubmit(service.form.value)">
     <mat-grid-list cols="1" rowHeight="300px">
         <mat-grid-tile>
             <div class="controler-container">
@@ -11,7 +11,7 @@
                     <input formControlName='description' matInput placeholder="Enter Description*">
                     <mat-error>This field is required.</mat-error>
                 </mat-form-field>
-                <div class="button-row">
+                <div class="button-row text-center">
                     <button mat-raised-button color='primary' type='submit' [disabled]='service.form.invalid'>Add</button>
                     <button mat-raised-button color='warn' (click)='onClick()'>Clear</button>
                 </div>

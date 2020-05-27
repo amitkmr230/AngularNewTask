@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PostService } from 'src/app/shared/post.service';
 import { NotificationService } from 'src/app/shared/notification.service';
 import { MatDialogRef } from '@angular/material/dialog';
+import { Post } from 'src/app/shared/post';
 
 @Component({
   selector: 'app-post',
@@ -10,6 +11,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 })
 export class PostComponent implements OnInit {
 
+  postList = []
+
   constructor(public service: PostService, 
     public notificationService: NotificationService,
     public dialogRef: MatDialogRef<PostComponent>) { }
@@ -17,9 +20,15 @@ export class PostComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  onSubmit() {
+  onSubmit(value: Post) {
     if(this.service.form.valid) {
-      
+      this.service.addPost(value).subscribe(res => { 
+        this.service.getAllPosts()
+      .subscribe(
+        res => this.postList = res,
+        err => console.log(err)
+      )
+      });
       this.service.form.reset();
       this.service.initializeFormGroup();
       this.notificationService.success(':: Submitted Successfully');
