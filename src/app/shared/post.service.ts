@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import {FormGroup, FormControl, Validators} from '@angular/forms'
 import { Post } from './post';
-import { throwError } from 'rxjs';
+import { throwError, Observable } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -33,9 +33,27 @@ export class PostService {
     return this.http.get<any>(this._allPosts) 
   }
 
-  //Http request to add a enquiry in the database
-  addPost(post: Post) { 
-    return this.http.post(this._allPosts, post)
+  addPost(post: Post): Observable<Post> {
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('Access-Control-Allow-Origin', '*');
+    headers = headers.append('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,DELETE,PUT');
+    return this.http.post<Post>(this._allPosts, post, {headers})
+    .pipe(
+      catchError(this.handleError)
+    )
+  }  
+  getById(id): Observable<Post> {
+    return this.http.get<Post>(this._allPosts + id)
+    .pipe(
+      catchError(this.handleError)
+    )
+  }
+
+  editPost(id: any, post) {
+    let headers: HttpHeaders = new HttpHeaders();
+    headers = headers.append('Access-Control-Allow-Origin', '*');
+    headers = headers.append('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,DELETE,PUT');
+    return this.http.put(`${this._allPosts}/${id}`, JSON.stringify(post), {headers})
       .pipe(
         retry(1),
         catchError(this.handleError)

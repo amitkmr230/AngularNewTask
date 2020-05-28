@@ -11,8 +11,6 @@ import { Post } from 'src/app/shared/post';
 })
 export class PostComponent implements OnInit {
 
-  postList = []
-
   constructor(public service: PostService, 
     public notificationService: NotificationService,
     public dialogRef: MatDialogRef<PostComponent>) { }
@@ -22,13 +20,12 @@ export class PostComponent implements OnInit {
 
   onSubmit(value: Post) {
     if(this.service.form.valid) {
-      this.service.addPost(value).subscribe(res => { 
-        this.service.getAllPosts()
-      .subscribe(
-        res => this.postList = res,
-        err => console.log(err)
-      )
-      });
+      if (!this.service.form.get('$key').value) {
+        this.service.addPost(value).subscribe(res => {           
+          console.log(res),
+          err => console.log(err)        
+        });
+      }
       this.service.form.reset();
       this.service.initializeFormGroup();
       this.notificationService.success(':: Submitted Successfully');

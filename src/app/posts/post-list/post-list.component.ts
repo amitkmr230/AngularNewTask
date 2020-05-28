@@ -11,7 +11,7 @@ import { NotificationService } from 'src/app/shared/notification.service';
 })
 export class PostListComponent implements OnInit {
 
-  postList: []
+  postList:any[] = []
 
   constructor(private service: PostService, private dialog: MatDialog, public notificationService: NotificationService) { }
 
@@ -20,6 +20,9 @@ export class PostListComponent implements OnInit {
       .subscribe(
         res => this.postList = res,
         err => console.log(err)
+      )
+      this.service.addPost(this.service.form.value).subscribe(res => this.postList.push(res),
+      err => console.log(err)
       )
   }
 
@@ -34,7 +37,7 @@ export class PostListComponent implements OnInit {
 
   // Method to delete a enquiry
   delete($key) {
-    console.log("working")
+    console.log("DELETING")
     this.service.deletePost($key).subscribe(res => {
       this.postList.splice($key, 1);
       this.notificationService.success(':: Deleted Successfully');
