@@ -18,8 +18,8 @@
         <td>{{i+1}}</td>
         <td>{{list.title}}</td>
         <td>{{list.body}}</td>
-        <td><button type="button" class="btn btn-primary">EDIT</button></td>
-        <td><button type="button" class="btn btn-danger" (click) = 'delete(list._id)'>DELETE</button></td>
+        <td><button type="button" class="btn btn-primary" (click) = 'onEdit()'>EDIT</button></td>
+        <td><button type="button" class="btn btn-danger" (click) = 'delete(list.id)'>DELETE</button></td>
       </tr>
     </tbody>
   </table>

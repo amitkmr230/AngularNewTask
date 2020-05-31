@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { PostService } from 'src/app/shared/post.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { PostComponent } from '../post/post.component';
 import { NotificationService } from 'src/app/shared/notification.service';
+import { Post } from 'src/app/shared/post';
+import { PostEditComponent } from '../post-edit/post-edit.component';
 
 @Component({
   selector: 'app-post-list',
@@ -11,19 +13,16 @@ import { NotificationService } from 'src/app/shared/notification.service';
 })
 export class PostListComponent implements OnInit {
 
-  postList:any[] = []
+  postList:Post[] = []
 
-  constructor(private service: PostService, private dialog: MatDialog, public notificationService: NotificationService) { }
+  constructor(private service: PostService, private dialog: MatDialog, public notificationService: NotificationService) {
+   }
 
   ngOnInit(): void {
-    this.service.getAllPosts()
-      .subscribe(
-        res => this.postList = res,
-        err => console.log(err)
-      )
-      this.service.addPost(this.service.form.value).subscribe(res => this.postList.push(res),
-      err => console.log(err)
-      )
+    this.service.getAll().subscribe((data: Post[])=>{
+      this.postList = data;
+      console.log(this.postList);
+    }) 
   }
 
   onCreate() {
@@ -35,13 +34,27 @@ export class PostListComponent implements OnInit {
     this.dialog.open(PostComponent, dialogConfig)
   }
 
-  // Method to delete a enquiry
-  delete($key) {
-    console.log("DELETING")
-    this.service.deletePost($key).subscribe(res => {
-      this.postList.splice($key, 1);
-      this.notificationService.success(':: Deleted Successfully');
-    });
+  onEdit(){
+    this.service.populateForm(this.service.form.value);
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+    dialogConfig.width = "50%";
+    this.dialog.open(PostEditComponent, dialogConfig)
   }
 
+  // Method to delete a enquiry
+  delete(id){
+    this.notificationService.success(':: Wait, Your request is being processing.');
+    this.service.delete(id).subscribe(res => {
+         this.postList = this.postList.filter(item => item.id !== id);
+         console.log('Post deleted successfully!');
+         this.notificationService.success(':: Deleted Successfully');
+    },
+    err => {
+      console.log(err);
+      this.notificationService.success(':: Error deleting. Please try again later');
+    } 
+    )
+  }
 }

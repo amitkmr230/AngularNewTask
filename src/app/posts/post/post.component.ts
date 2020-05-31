@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { PostService } from 'src/app/shared/post.service';
 import { NotificationService } from 'src/app/shared/notification.service';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -11,24 +11,35 @@ import { Post } from 'src/app/shared/post';
 })
 export class PostComponent implements OnInit {
 
+  postList:Post[] = []
+
   constructor(public service: PostService, 
     public notificationService: NotificationService,
     public dialogRef: MatDialogRef<PostComponent>) { }
 
   ngOnInit(): void {
+    // this.service.getAll().subscribe((data: Post[])=>{
+    //   this.postList = data;
+    //   console.log(this.postList);
+    // })
   }
 
-  onSubmit(value: Post) {
+  onSubmit() {
     if(this.service.form.valid) {
-      if (!this.service.form.get('$key').value) {
-        this.service.addPost(value).subscribe(res => {           
-          console.log(res),
-          err => console.log(err)        
-        });
-      }
+      console.log(this.service.form.value);
+      this.service.create(this.service.form.value).subscribe(res => {
+        this.postList.push(res);
+        localStorage.setItem('posts', JSON.stringify(this.postList))
+         console.log(this.postList, 'Post created successfully!');
+         this.ngOnInit()
+         this.notificationService.success(':: Submitted Successfully');
+    },
+    err => {
+      console.log(err);
+      this.notificationService.success(':: Error while submitting. Please try again.');
+    })
       this.service.form.reset();
-      this.service.initializeFormGroup();
-      this.notificationService.success(':: Submitted Successfully');
+      this.service.initializeFormGroup();      
       this.onClose()
     }
   }
@@ -41,8 +52,8 @@ export class PostComponent implements OnInit {
   }
 
   onClose() {
-    this.service.form.reset();
-    this.service.initializeFormGroup();
-    this.dialogRef.close();
+      this.service.form.reset();
+      this.service.initializeFormGroup();
+      this.dialogRef.close();    
   }
 }

@@ -19,13 +19,15 @@ import { PostComponent } from './posts/post/post.component';
 import { PostService } from './shared/post.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PostListComponent } from './posts/post-list/post-list.component';
+import { PostEditComponent } from './posts/post-edit/post-edit.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PostsComponent,
     PostComponent,
-    PostListComponent
+    PostListComponent,
+    PostEditComponent
   ],
   imports: [
     BrowserModule,

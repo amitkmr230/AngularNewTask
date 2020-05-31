@@ -3,7 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http'
 import {FormGroup, FormControl, Validators} from '@angular/forms'
 import { Post } from './post';
 import { throwError, Observable } from 'rxjs';
-import { retry, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -11,73 +12,79 @@ import { retry, catchError } from 'rxjs/operators';
 
 export class PostService {
 
-  private _allPosts = "https://jsonplaceholder.typicode.com/posts";
+  private apiURL = "https://jsonplaceholder.typicode.com";
+   
+  httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': 'http://localhost:4200'
+    })
+  }
 
   constructor(private http: HttpClient) { }  
 
   form: FormGroup = new FormGroup({
-    $key : new FormControl(null),
+    id : new FormControl(''),
     title : new FormControl('', Validators.required),
-    description : new FormControl('', Validators.required)
+    body : new FormControl('', Validators.required)
   });
 
   initializeFormGroup() {
     this.form.setValue({
-      $key : null,
-       title : '',
-      description : ''
+      id : '',
+      title : '',
+      body : ''
     })
   }
 
-  getAllPosts() {
-    return this.http.get<any>(this._allPosts) 
-  }
-
-  addPost(post: Post): Observable<Post> {
-    let headers: HttpHeaders = new HttpHeaders();
-    headers = headers.append('Access-Control-Allow-Origin', '*');
-    headers = headers.append('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,DELETE,PUT');
-    return this.http.post<Post>(this._allPosts, post, {headers})
+  getAll(): Observable<Post[]> {
+    return this.http.get<Post[]>(this.apiURL + '/posts/')
     .pipe(
-      catchError(this.handleError)
+      catchError(this.errorHandler)
+    )
+  }
+   
+  create(post): Observable<Post> {
+    return this.http.post<Post>(this.apiURL + '/posts/', post, this.httpOptions)
+    .pipe(
+      catchError(this.errorHandler)
     )
   }  
-  getById(id): Observable<Post> {
-    return this.http.get<Post>(this._allPosts + id)
+   
+  find(id): Observable<Post> {
+    return this.http.get<Post>(this.apiURL + '/posts/' + id)
     .pipe(
-      catchError(this.handleError)
+      catchError(this.errorHandler)
     )
   }
-
-  editPost(id: any, post) {
-    let headers: HttpHeaders = new HttpHeaders();
-    headers = headers.append('Access-Control-Allow-Origin', '*');
-    headers = headers.append('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,DELETE,PUT');
-    return this.http.put(`${this._allPosts}/${id}`, JSON.stringify(post), {headers})
-      .pipe(
-        retry(1),
-        catchError(this.handleError)
-      );
+   
+  update(id, post): Observable<Post> {
+    return this.http.put<Post>(this.apiURL + '/posts/' + id, JSON.stringify(post), this.httpOptions)
+    .pipe(
+      catchError(this.errorHandler)
+    )
   }
-
-  deletePost(id: any) {
-    let headers: HttpHeaders = new HttpHeaders();
-    headers = headers.append('Access-Control-Allow-Origin', '*');
-    headers = headers.append('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,DELETE,PUT');
-    return this.http.delete(`${this._allPosts}/${id}`, {headers})
-      .pipe(
-        retry(1),
-        catchError(this.handleError)
-      );
+   
+  delete(id){
+    return this.http.delete<Post>(this.apiURL + '/posts/' + id, this.httpOptions)
+    .pipe(
+      catchError(this.errorHandler)
+    )
   }
-
-  //Method to handle error scenario 
-  handleError(error) {
+    
+  
+  errorHandler(error) {
     let errorMessage = '';
-    if (error.error) {
-        errorMessage = `${error.error.text}`;
+    if(error.error instanceof ErrorEvent) {
+      errorMessage = error.error.message;
+    } else {
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
     return throwError(errorMessage);
-  }
+ }
+
+ populateForm(posts) {
+  this.form.setValue(_.omit(posts, this.form.value));
+}
   
 }
